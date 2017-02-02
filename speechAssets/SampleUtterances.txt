@@ -1,0 +1,29 @@
+//it is entirely possible that every instance of the word "company" below will be replaced with "card"
+
+GetCurrentListingIntent get price for {company}
+GetCurrentListingIntent what is {company} at right now
+GetCurrentListingIntent how much is {company} worth
+GetCurrentListingIntent tell me listings for {company}
+GetCurrentListingIntent current price of {company}
+GetCurrentListingIntent share price of {company}
+GetCurrentListingIntent stock price of {company}
+GetCurrentListingIntent what is {company} worth
+GetCurrentListingIntent how much for {company}
+GetCurrentListingIntent tell me stock price for {company}
+GetCurrentListingIntent tell me stock price of {company}
+GetCurrentListingIntent current value of {company}
+GetCurrentListingIntent current price of {company}
+GetCurrentListingIntent current share price of {company}
+GetCurrentListingIntent what {company} is worth
+GetCurrentListingIntent what {company} is running
+GetCurrentListingIntent {company}
+
+GetHistoryIntent {amount} {duration} 
+GetHistoryIntent {amount} {duration} ago
+GetHistoryIntent yesterday
+GetHistoryIntent last {duration}
+
+AMAZON.StopIntent no
+AMAZON.StopIntent nope
+AMAZON.StopIntent no thanks
+AMAZON.StopIntent no thank you

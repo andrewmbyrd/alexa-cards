@@ -1,0 +1,35 @@
+{
+  "intents": [
+    {
+      "intent": "GetCurrentListingIntent",
+      "slots": [
+        {
+          "name": "company",  //or card name
+          "type": "LIST_OF_COMPANIES" //or list_of_card_names
+        }
+      ]
+    },
+    {
+       "intent": "GetHistoryIntent", // this will be to hear what the stock/card was priced at in the past requested amount of time
+       "slots":[
+         {
+           "name": "duration",
+           "type": "LIST_OF_TIME_UNITS"
+         },
+        {
+           "name": "amount",
+           "type": "LIST_OF_DURATIONS"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}
