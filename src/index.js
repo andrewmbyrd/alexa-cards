@@ -212,14 +212,14 @@ function handleGetHistoryRequest(intent, session, response) {
     var preSpeech = "";
     if(intent.slots.amount.value){
         if(intent.slots.amount.value === "last")
-            preSpeech = company + "s price " + intent.slots.amount.value + " " + intent.slots.duration.value;
+            preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value;
         else
-            preSpeech = company + "s price " + intent.slots.amount.value + " " + intent.slots.duration.value + " ago ";
+            preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value + " ago ";
     }else
         preSpeech = company + "s price yesterday ";
     
     var speechOutput = {
-        speech:  preSpeech + "was $125. Current stock price is $128. Would you like to hear the price at a different time?",
+        speech:  preSpeech + " was $125. Current stock price is $128. Would you like to hear the price at a different time?",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
