@@ -133,7 +133,7 @@ PriceSkill.prototype.intentHandlers = {
 
 function getWelcomeResponse(response) {
     // If we wanted to initialize the session to have some attributes we could add those here.
-    console.log(response);
+    
     var cardTitle = "Select a Company";
     var repromptText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
             "For example, you could say Apple, or Amazon, or you can say exit. Now, which company would you like to hear about?";
@@ -147,7 +147,7 @@ function getWelcomeResponse(response) {
         type: AlexaSkill.speechOutputType.SSML
     };
     var repromptOutput = {
-        speech: repromptText,
+        speech:"<speak>" +  repromptText + "</speak>",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     response.askWithCard(speechOutput, repromptOutput, cardTitle, cardOutput);
@@ -157,11 +157,8 @@ function getWelcomeResponse(response) {
  * Gets a poster prepares the speech to reply to the user.
  */
 function handleGetCurrentPriceRequest(intent, session, response) {
-    console.log("Current Price Request \n");
-    console.log(response);
-    
-    var daySlot = intent.slots.day;
-    var repromptText = " Which company's stock price would you like to know?";
+   
+    var repromptText = "I'm not familiar with that company. Which company's stock price would you like to know?";
  
     var sessionAttributes = {};
     
@@ -170,12 +167,12 @@ function handleGetCurrentPriceRequest(intent, session, response) {
     session.attributes = sessionAttributes;
     
     var speechOutput = {
-        speech: intent.slots.company.value + "'s current stock price is " +"$128 per share." + " Would you like to hear historical values for this company?",
+        speech: "<speak>" + intent.slots.company.value + "'s current stock price is " +"$128 per share." + " Would you like to hear historical values for this company?" + "</speak>",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
     var repromptOutput = {
-        speech: repromptText,
+        speech: "<speak>" + repromptText + "</speak>",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
@@ -190,7 +187,7 @@ function handleGetDurationFromUser(intent, session, response){
     
     
     var speechOutput = {
-        speech: repromptText,
+        speech: "<speak>" +  speechText + "</speak>",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
@@ -205,8 +202,7 @@ function handleGetDurationFromUser(intent, session, response){
  * Gets a poster prepares the speech to reply to the user.
  */
 function handleGetHistoryRequest(intent, session, response) {
-    console.log("History Request \n");
-    console.log(response);
+    
     
     var company = session.attributes.company;
     var repromptText = "To hear historical price data for " + company +
