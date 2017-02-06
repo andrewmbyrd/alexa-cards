@@ -1,5 +1,3 @@
-//it is entirely possible that every instance of the word "company" below will be replaced with "card"
-
 GetCurrentListingIntent get price for {company}
 GetCurrentListingIntent what is {company} at right now
 GetCurrentListingIntent how much is {company} worth
@@ -20,7 +18,9 @@ GetCurrentListingIntent {company}
 
 GetHistoryIntent {amount} {duration} 
 GetHistoryIntent {amount} {duration} ago
-GetHistoryIntent yesterday
+GetHistoryIntent {day}
+
+
 
 AMAZON.StopIntent no
 AMAZON.StopIntent nope

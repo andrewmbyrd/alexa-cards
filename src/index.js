@@ -159,17 +159,26 @@ function getWelcomeResponse(response) {
 function handleGetCurrentPriceRequest(intent, session, response) {
    
     var repromptText = "I'm not familiar with that company. Which company's stock price would you like to know?";
- 
+    
     var sessionAttributes = {};
     
     //store the requested company name in the session so that we may pull a history on it if requested
     sessionAttributes.company = intent.slots.company.value;
     session.attributes = sessionAttributes;
     
-    var speechOutput = {
-        speech: intent.slots.company.value + "'s current stock price is " +"$128 per share." + " Would you like to hear historical values for this company?" ,
-        type: AlexaSkill.speechOutputType.PLAIN_TEXT
-    };
+    
+    var company = intent.slots.company.value;
+    if (company){
+        var speechOutput = {
+            speech: intent.slots.company.value + "'s current stock price is " + "$128 per share." + " Would you like to hear historical values for this company?" ,
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+    }else{
+        var speechOutput = {
+            speech: "I'm not familiar with that company. Which company's stock price would you like to know?",
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+    }
     
     var repromptOutput = {
         speech:  repromptText ,
@@ -189,6 +198,7 @@ function handleGetDurationFromUser(intent, session, response){
     var speechOutput = {
         speech:   speechText,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        
     };
     
     var repromptOutput = {
@@ -210,18 +220,28 @@ function handleGetHistoryRequest(intent, session, response) {
  
     
     var preSpeech = "";
-    if(intent.slots.amount.value){
-        if(intent.slots.amount.value === "last")
-            preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value;
-        else
-            preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value + " ago ";
-    }else
-        preSpeech = company + "s price yesterday ";
     
-    var speechOutput = {
-        speech:  preSpeech + " was $125. Current stock price is $128. Would you like to hear the price at a different time?",
-        type: AlexaSkill.speechOutputType.PLAIN_TEXT
-    };
+    if(intent.slots.duration.value || intent.slots.amount.value || intent.slots.day.value){
+        if(intent.slots.amount.value){
+            if(intent.slots.amount.value === "last")
+                preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value;
+            else
+                preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value + " ago ";
+        }else
+            preSpeech = company + "s price yesterday ";
+    
+    
+        var speechOutput = {
+            speech:  preSpeech + " was $125. Current stock price is $128. Would you like to hear the price at a different time?",
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+        
+    }else{
+        var speechOutput = {
+            speech:  "That is not a valid duration. Try something like: 1 week ago, or, yesterday",
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+    }
     
     var repromptOutput = {
         speech: repromptText,
