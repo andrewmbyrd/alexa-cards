@@ -143,11 +143,11 @@ function getWelcomeResponse(response) {
     // understood, they will be prompted again with this text.
 
     var speechOutput = {
-        speech: "<speak>" + speechText + "</speak>",
+        speech: speechText ,
         type: AlexaSkill.speechOutputType.SSML
     };
     var repromptOutput = {
-        speech:"<speak>" +  repromptText + "</speak>",
+        speech: repromptText,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     response.askWithCard(speechOutput, repromptOutput, cardTitle, cardOutput);
@@ -167,12 +167,12 @@ function handleGetCurrentPriceRequest(intent, session, response) {
     session.attributes = sessionAttributes;
     
     var speechOutput = {
-        speech: "<speak>" + intent.slots.company.value + "'s current stock price is " +"$128 per share." + " Would you like to hear historical values for this company?" + "</speak>",
+        speech: intent.slots.company.value + "'s current stock price is " +"$128 per share." + " Would you like to hear historical values for this company?" ,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
     var repromptOutput = {
-        speech: "<speak>" + repromptText + "</speak>",
+        speech:  repromptText ,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
@@ -187,7 +187,7 @@ function handleGetDurationFromUser(intent, session, response){
     
     
     var speechOutput = {
-        speech: "<speak>" +  speechText + "</speak>",
+        speech:   speechText,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
