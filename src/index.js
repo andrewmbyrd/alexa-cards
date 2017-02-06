@@ -104,7 +104,7 @@ PriceSkill.prototype.intentHandlers = {
     },
 
     //i'm making her say Ok, Goodbye! when she detects that the user has said something (like "exit" or "stop") to trigger the StopIntent
-    //I wonder why here we don't have like a session.close() or something?
+    //I wonder why here we don't have like a session.close() or something? <- because tell indicates that sessionShouldEnd = true
     "AMAZON.StopIntent": function (intent, session, response) {
         var speechOutput = {
                 speech: "Ok, Goodbye!",
@@ -133,8 +133,8 @@ function getWelcomeResponse(response) {
     var cardTitle = "Company Name from response hopefully";
     var repromptText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
             "For example, you could say Apple, Inc., or Amazon, Inc., or you can say exit. Now, which company would you like to hear about?";
-    var speechText = "<p>Prices.</p> <p>What company would you like the current price of?</p>";
-    var cardOutput = "Prices. What company would you like to know the current stock price of?";
+    var speechText = "<p>Welcome to Prices!</p> <p>What company would you like the current stock price of?</p>";
+    var cardOutput = "Welcome to Prices. What company would you like to know the current stock price of?";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
 
@@ -162,11 +162,11 @@ function handleGetCurrentPriceRequest(intent, session, response) {
     var sessionAttributes = {};
     
     var speechOutput = {
-        speech: "Apple's current stock price is $128",
+        speech: intent.slots.company.value + "'s current stock price is " +"$128" + " Would you like to hear historical values for this company?",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
-    response.tell(speechOutput);
+    response.ask(speechOutput);
 
 }
 
@@ -183,7 +183,7 @@ function handleGetHistoryRequest(intent, session, response) {
     var sessionAttributes = {};
     
     var speechOutput = {
-        speech: "Apple's Inc.'s price 5 days ago was $125. Current stock price is $128",
+        speech: "Apple Inc.'s price 5 days ago was $125. Current stock price is $128",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
