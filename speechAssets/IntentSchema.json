@@ -30,6 +30,9 @@
     },
     {
       "intent": "AMAZON.CancelIntent"
+    },
+    {
+      "intent": "AMAZON.YesIntent"      
     }
   ]
 }

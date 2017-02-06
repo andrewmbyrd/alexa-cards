@@ -84,9 +84,13 @@ PriceSkill.prototype.intentHandlers = {
     "GetHistoryIntent": function (intent, session, response) {
         handleGetHistoryRequest(intent, session, response);
     },
+    
+    "AMAZON.YesIntent": function (intent, session, response) {
+        handleGetDurationFromUser(intent, session, response);
+    },
 
     //here, we're overriding Amazon's built-in help intent functionality (i think). So based on the user's words, Alexa deciphers that 
-    //we should run HelpIntent, which is simply a function. the response.ask makes her talk back to the user, with the expectation of a response
+    //we should a HelpIntent was called, which we correlate with the function described here. the response.ask makes her talk back to the user, with the expectation of a response
     //from the user
     "AMAZON.HelpIntent": function (intent, session, response) {
         var speechText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
@@ -130,9 +134,9 @@ PriceSkill.prototype.intentHandlers = {
 function getWelcomeResponse(response) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     console.log(response);
-    var cardTitle = "Company Name from response hopefully";
+    var cardTitle = "Select a Company";
     var repromptText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
-            "For example, you could say Apple, Inc., or Amazon, Inc., or you can say exit. Now, which company would you like to hear about?";
+            "For example, you could say Apple, or Amazon, or you can say exit. Now, which company would you like to hear about?";
     var speechText = "<p>Welcome to Prices!</p> <p>What company would you like the current stock price of?</p>";
     var cardOutput = "Welcome to Prices. What company would you like to know the current stock price of?";
     // If the user either does not reply to the welcome message or says something that is not
@@ -155,39 +159,80 @@ function getWelcomeResponse(response) {
 function handleGetCurrentPriceRequest(intent, session, response) {
     console.log("Current Price Request \n");
     console.log(response);
+    
     var daySlot = intent.slots.day;
-    var repromptText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
-            "For example, you could say Apple, Inc., or Amazon, Inc., or you can say exit. Now, which company would you like to hear about?";
+    var repromptText = " Which company's stock price would you like to know?";
  
     var sessionAttributes = {};
     
+    //store the requested company name in the session so that we may pull a history on it if requested
+    sessionAttributes.company = intent.slots.company.value;
+    session.attributes = sessionAttributes;
+    
     var speechOutput = {
-        speech: intent.slots.company.value + "'s current stock price is " +"$128" + " Would you like to hear historical values for this company?",
+        speech: intent.slots.company.value + "'s current stock price is " +"$128 per share." + " Would you like to hear historical values for this company?",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
-    response.ask(speechOutput);
+    var repromptOutput = {
+        speech: repromptText,
+        type: AlexaSkill.speechOutputType.PLAIN_TEXT
+    };
+    
+    response.ask(speechOutput, repromptOutput);
 
 }
 
+
+function handleGetDurationFromUser(intent, session, response){
+    var speechText = "How far back should I look? For example, you can say: 5 days ago, or , last week";
+    var repromptText = "Sorry, I didn't understand that. How far back should I look to find the stock price?"
+    
+    
+    var speechOutput = {
+        speech: repromptText,
+        type: AlexaSkill.speechOutputType.PLAIN_TEXT
+    };
+    
+    var repromptOutput = {
+        speech: repromptText,
+        type: AlexaSkill.speechOutputType.PLAIN_TEXT
+    };
+    
+    response.ask(speechOutput, repromptOutput);
+}
 /**
  * Gets a poster prepares the speech to reply to the user.
  */
 function handleGetHistoryRequest(intent, session, response) {
     console.log("History Request \n");
     console.log(response);
-    var daySlot = intent.slots.day;
-    var repromptText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
-            "For example, you could say Apple, Inc., or Amazon, Inc., or you can say exit. Now, which company would you like to hear about?";
+    
+    var company = session.attributes.company;
+    var repromptText = "To hear historical price data for " + company +
+            ", Tell me how far back in time you want to go. For example, you could say 5 days ago, or, last week. So how far back should I look?";
  
-    var sessionAttributes = {};
+    
+    var preSpeech = "";
+    if(intent.slots.amount.value){
+        if(intent.slots.amount.value === "last")
+            preSpeech = company + "s price " + intent.slots.amount.value + " " + intent.slots.duration.value;
+        else
+            preSpeech = company + "s price " + intent.slots.amount.value + " " + intent.slots.duration.value + " ago ";
+    }else
+        preSpeech = company + "s price yesterday ";
     
     var speechOutput = {
-        speech: "Apple Inc.'s price 5 days ago was $125. Current stock price is $128",
+        speech:  preSpeech + "was $125. Current stock price is $128. Would you like to hear the price at a different time?",
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
-    response.tell(speechOutput);
+    var repromptOutput = {
+        speech: repromptText,
+        type: AlexaSkill.speechOutputType.PLAIN_TEXT
+    };
+    
+    response.ask(speechOutput, repromptOutput);
 }
 
 

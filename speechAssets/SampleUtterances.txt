@@ -21,7 +21,6 @@ GetCurrentListingIntent {company}
 GetHistoryIntent {amount} {duration} 
 GetHistoryIntent {amount} {duration} ago
 GetHistoryIntent yesterday
-GetHistoryIntent last {duration}
 
 AMAZON.StopIntent no
 AMAZON.StopIntent nope
