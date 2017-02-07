@@ -150,6 +150,8 @@ function getWelcomeResponse(response) {
         speech: repromptText,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
+    
+    sessionAttributes.wantsToChangeCompanies = true;
     response.askWithCard(speechOutput, repromptOutput, cardTitle, cardOutput);
 }
 
@@ -158,33 +160,47 @@ function getWelcomeResponse(response) {
  */
 function handleGetCurrentPriceRequest(intent, session, response) {
    
-    var repromptText = "I'm not familiar with that company. Which company's stock price would you like to know?";
+    var repromptText = "I'm awaiting your interest. Which company's stock price would you like to know?";
     
     var sessionAttributes = {};
     
     //store the requested company name in the session so that we may pull a history on it if requested
-    sessionAttributes.company = intent.slots.company.value;
-    sessionAttributes.wantsInfo = true;
-    session.attributes = sessionAttributes;
     
-    
-    var company = intent.slots.company.value;
-    if (company){
+    if(session.attributes.company && !session.attributes.wantsToChangeCompanies){
+        session.attributes.wantsToChangeCompanies = true;
         var speechOutput = {
-            speech: intent.slots.company.value + "'s current stock price is " + "$128 per share." + " Would you like to hear historical values for this company?" ,
+            speech:  "Hey we're supposed to be talking about history right now. If you're done with " + session.attributes.company + " then say a different company and we can start over." ,
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
     }else{
-        var speechOutput = {
-            speech: "I'm not familiar with that company. Which company's stock price would you like to know?",
-            type: AlexaSkill.speechOutputType.PLAIN_TEXT
-        };
-    }
     
+        var company = intent.slots.company.value;
+        if (company && session.attributes.wantsToChangeCompanies){
+            var speechOutput = {
+                speech: intent.slots.company.value + "'s current stock price is " + "$128 per share." + " Would you like to hear historical values for this company?" ,
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
+            session.attributes.wantsToChangeCompanies = false;
+        }else{
+            var speechOutput = {
+                speech: "I'm not familiar with that company. Which company's stock price would you like to know?",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
+        }
+    
+    }
     var repromptOutput = {
         speech:  repromptText ,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
+    
+    
+    
+    sessionAttributes.company = intent.slots.company.value;
+    sessionAttributes.wantsInfo = true;
+    
+    session.attributes = sessionAttributes;
+    
     
     response.ask(speechOutput, repromptOutput);
 
@@ -192,16 +208,16 @@ function handleGetCurrentPriceRequest(intent, session, response) {
 
 
 function handleGetDurationFromUser(intent, session, response){
-    if(session.attributes)
+    if(session.attributes.company)
         var speechText = "How far back should I look? For example, you can say: 5 days ago, or , last week";
     else
         var speechText = "I can help you learn about a company's stock information. Please say a company name";
     
-    var repromptText = "How far back should I look to find the stock price?"
+    var repromptText = "How far back should I look to find the stock price?";
     
     
     var speechOutput = {
-        speech:   speechText,
+        speech: speechText,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
         
     };
