@@ -1,25 +1,27 @@
-GetCurrentListingIntent get price for {company}
-GetCurrentListingIntent what is {company} at right now
-GetCurrentListingIntent how much is {company} worth
-GetCurrentListingIntent tell me listings for {company}
-GetCurrentListingIntent current price of {company}
-GetCurrentListingIntent share price of {company}
-GetCurrentListingIntent stock price of {company}
-GetCurrentListingIntent what is {company} worth
-GetCurrentListingIntent how much for {company}
-GetCurrentListingIntent tell me stock price for {company}
-GetCurrentListingIntent tell me stock price of {company}
-GetCurrentListingIntent current value of {company}
-GetCurrentListingIntent current price of {company}
-GetCurrentListingIntent current share price of {company}
-GetCurrentListingIntent what {company} is worth
-GetCurrentListingIntent what {company} is running
-GetCurrentListingIntent {company}
+GetCardIntent get price for {card}
+GetCardIntent show me information about {card}
+GetCardIntent tell me information about {card}
+GetCardIntent information about {card}
+GetCardIntent show me {card}
+GetCardIntent tell me about {card}
+GetCardIntent list {card}
+GetCardIntent show {card}
+GetCardIntent display {card}
+GetCardIntent {card} information
+GetCardIntent teach me about {card}
+GetCardIntent teach my friend about {card}
+GetCardIntent teach me about {card}
+GetCardIntent pull up {card}
+GetCardIntent look up {card}
+GetCardIntent find {card}
+GetCardIntent {card}
 
-GetHistoryIntent {amount} {duration} 
-GetHistoryIntent {amount} {duration} ago
-GetHistoryIntent {day}
-
+GetDetailsIntent {statistic}
+GetDetailsIntent show me its {statistic}
+GetDetailsIntent what is its {statistic}
+GetDetailsIntent what's its {statistic}
+GetDetailsIntent what's its {statistic} and {otherStat}
+GetDetailsIntent {statistic} and {otherStat}
 
 
 AMAZON.StopIntent no

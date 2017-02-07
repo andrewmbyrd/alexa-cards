@@ -1,29 +1,27 @@
 {
   "intents": [
     {
-      "intent": "GetCurrentListingIntent",
+      "intent": "GetCardIntent",
       "slots": [
         {
-          "name": "company",  
-          "type": "LIST_OF_COMPANIES" 
+          "name": "card",  
+          "type": "LIST_OF_CARDS" 
         }
       ]
     },
     {
-       "intent": "GetHistoryIntent", 
+       "intent": "GetDetailsIntent", 
        "slots":[
          {
-           "name": "duration",
-           "type": "LIST_OF_TIME_UNITS"
+           "name": "statistic",
+           "type": "LIST_OF_STATISTICS"
          },
-        {
-           "name": "amount",
-           "type": "LIST_OF_DURATIONS"
-        },
-        {
-          "name": "day",
-          "type": "AMAZON.DATE"
-        }
+           
+         {
+           "name": "otherStat",
+           "type": "OTHER_STAT"
+         }
+       
       ]
     },
     {

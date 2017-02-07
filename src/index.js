@@ -7,20 +7,20 @@
 
  * Examples:
  * One-shot model:
- * User:  "Alexa, ask Prices for current value of Apple, Inc."
- * Alexa: "Apple, Inc's current share price is $128. Would you like to hear historical prices?"
+ * User:  "Alexa, ask cards for information about Monastery Swiftspear"
+ * Alexa: "Monastery Swiftspear: mana cost: 1, type: creature, text: haste, prowess. Would you like to hear more?"
  * User: "No."
  * Alexa: "Good bye!"
  *
  * Dialog model:
- * User:  "Alexa, open Prices"
- * Alexa: "Prices. What commodity would you like to know the price of?"
- * User:  "Apple, Inc."
- * Alexa: "Apple, Inc's current share price is $128. Would you like to hear historical prices?"
+ * User:  "Alexa, open Cards"
+ * Alexa: "Welcome to Magic Card information station!. What card would you like to hear about?"
+ * User:  "Monastery Swiftspear"
+ * Alexa: "Monastery Swiftspear: mana cost: 1, type: creature, text: haste, prowess. Would you like to hear more?"
  * User:  "Yes."
- * Alexa: "How far back would you like to go?"
- * User: "5 days ago"
- * Alexa: "Apple Inc's share price 5 days ago was $[x]; [$y] dollars (lower/higher) than it's current price of $128. Would you like to hear another comparison?"
+ * Alexa: "What would you like to know?"
+ * User:  "tell me it's power and toughness"
+ * Alexa: "Monastery swiftspear has power of 1 and toughness of 2. Would you like to hear more?"
  * User: "No"
  * Alexa: "Ok. Goodbye!"
  */
@@ -46,56 +46,56 @@ var AlexaSkill = require('./AlexaSkill');
 var urlPrefix = undefined; //this will be updated later after I've gotten the speech working
 
 
-// PriceSkill is a child of AlexaSkill.
+// CardSkill is a child of AlexaSkill.
 
-var PriceSkill = function() {
+var CardSkill = function() {
     AlexaSkill.call(this, APP_ID);
 };
 
-// Extend AlexaSkill. so now PriceSkill is a constructor function that inherits all methods (at present) from AlexaSkill
-PriceSkill.prototype = Object.create(AlexaSkill.prototype);
-PriceSkill.prototype.constructor = PriceSkill;
+// Extend AlexaSkill. so now CardSkill is a constructor function that inherits all methods (at present) from AlexaSkill
+CardSkill.prototype = Object.create(AlexaSkill.prototype);
+CardSkill.prototype.constructor = CardSkill;
 
-PriceSkill.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
-    console.log("PriceSkill onSessionStarted requestId: " + sessionStartedRequest.requestId
+CardSkill.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
+    console.log("CardSkill onSessionStarted requestId: " + sessionStartedRequest.requestId
         + ", sessionId: " + session.sessionId);
 
     // any session init logic would go here
 };
 
-PriceSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
-    console.log("PriceSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
+CardSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
+    console.log("CardSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
     getWelcomeResponse(response, session);
 };
 
-PriceSkill.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
+CardSkill.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
     console.log("onSessionEnded requestId: " + sessionEndedRequest.requestId
         + ", sessionId: " + session.sessionId);
 
     // any session cleanup logic would go here
 };
 
-PriceSkill.prototype.intentHandlers = {
+CardSkill.prototype.intentHandlers = {
 
-    "GetCurrentListingIntent": function (intent, session, response) {
-        handleGetCurrentPriceRequest(intent, session, response);
+    "GetCardIntent": function (intent, session, response) {
+        handleGetCardRequest(intent, session, response);
     },
 
-    "GetHistoryIntent": function (intent, session, response) {
-        handleGetHistoryRequest(intent, session, response);
+    "GetDetailsIntent": function (intent, session, response) {
+        handleGetDetailsRequest(intent, session, response);
     },
     
     "AMAZON.YesIntent": function (intent, session, response) {
-        handleGetDurationFromUser(intent, session, response);
+        handleGetConfirmationFromUser(intent, session, response);
     },
 
     //here, we're overriding Amazon's built-in help intent functionality (i think). So based on the user's words, Alexa deciphers that 
     //we should a HelpIntent was called, which we correlate with the function described here. the response.ask makes her talk back to the user, with the expectation of a response
     //from the user
     "AMAZON.HelpIntent": function (intent, session, response) {
-        var speechText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
-            "For example, you could say Apple, Inc., or Amazon, Inc., or you can say exit. Now, which company would you like to hear about?";
-        var repromptText = "Which company's current stock price would you like to know?";
+        var speechText = "With Cards, you can get information about thousands of Magic Cards  " +
+            "For example, you could say Path to Exile. or Dark Confidant. or you can say exit. Now, which card would you like to hear about?";
+        var repromptText = "Which card's info would you like to know?";
         var speechOutput = {
             speech: speechText,
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
@@ -134,11 +134,12 @@ PriceSkill.prototype.intentHandlers = {
 function getWelcomeResponse(response, session) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     
-    var cardTitle = "Select a Company";
-    var repromptText = "With Prices, you can get the current listing for share prices of a company of your choice.  " +
-            "For example, you could say Apple, or Amazon, or you can say exit. Now, which company would you like to hear about?";
-    var speechText = "<p>Welcome to Prices!</p> <p>What company would you like the current stock price of?</p>";
-    var cardOutput = "Welcome to Prices. What company would you like to know the current stock price of?";
+    var cardTitle = "Select a Card";
+    var repromptText = "With Cards, you can get information about thousands of Magic Cards  " +
+            "For example, you could say Path to Exile. or Dark Confidant. or you can say exit. Now, which card would you like to hear about?";
+    var speechText = "<p>Welcome to Magic Card Information Station!</p> <p>What card would you like to hear about?</p>";
+    var cardOutput = "Welcome to Cards. What card would you like to learn about?";
+    var cardOutput = "Welcome to Cards. What card would you like to learn about?";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
 
@@ -151,37 +152,37 @@ function getWelcomeResponse(response, session) {
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
-    session.attributes.wantsToChangeCompanies = true;
+    session.attributes.wantsToChangeCards = true;
     response.askWithCard(speechOutput, repromptOutput, cardTitle, cardOutput);
 }
 
 /**
  * Gets a poster prepares the speech to reply to the user.
  */
-function handleGetCurrentPriceRequest(intent, session, response) {
+function handleGetCardRequest(intent, session, response) {
    
-    var repromptText = "I'm awaiting your interest. Which company's stock price would you like to know?";
+    var repromptText = "I'm awaiting your interest. Which card would you like to learn about?";
     
-    //store the requested company name in the session so that we may pull a history on it if requested
+    //store the requested card name in the session so that we may pull a history on it if requested
     
-    if(session.attributes.company && !session.attributes.wantsToChangeCompanies){
-        session.attributes.wantsToChangeCompanies = true;
+    if(session.attributes.card && !session.attributes.wantsToCards){
+        session.attributes.wantsToChangeCards = true;
         var speechOutput = {
-            speech:  "Hey we're supposed to be talking about history right now. If you're done with " + session.attributes.company + " then say a different company and we can start over." ,
+            speech:  "Hey we're supposed to be talking about card details right now. If you're done with " + session.attributes.card + " then say a different card and we can start over." ,
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
     }else{
     
-        var company = intent.slots.company.value;
-        if (company && session.attributes.wantsToChangeCompanies){
+        var card = intent.slots.card.value;
+        if (card && session.attributes.wantsToChangeCards){
             var speechOutput = {
-                speech: intent.slots.company.value + "'s current stock price is " + "$128 per share." + " You can say a different company now if you'd like. Otherwise: would you like to hear historical values for this company?" ,
+                speech: intent.slots.card.value + "'s mana cost is " + "red" + ", type is " + "creature" + ", card text is " + "haste, prowess" + "You can say a different card now if you'd like. Otherwise: would you like to hear more details about this card?" ,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
             
         }else{
             var speechOutput = {
-                speech: "I'm not familiar with that company. Which company's stock price would you like to know?",
+                speech: "I'm not familiar with that card. Which card would you like to know about?",
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
         }
@@ -194,7 +195,7 @@ function handleGetCurrentPriceRequest(intent, session, response) {
     
     
     
-    session.attributes.company = intent.slots.company.value;
+    session.attributes.card = intent.slots.card.value;
     
     
     response.ask(speechOutput, repromptOutput);
@@ -202,13 +203,16 @@ function handleGetCurrentPriceRequest(intent, session, response) {
 }
 
 
-function handleGetDurationFromUser(intent, session, response){
-    if(session.attributes.company)
-        var speechText = "How far back should I look? For example, you can say: 5 days ago, or , last week";
+function handleGetConfirmationFromUser(intent, session, response){
+    if(session.attributes.card){
+        var speechText = "What would you like to know?";
+        if(!session.attributes.knowsAttributes)
+            speechText += " for example, you can say: power, or, rarity, or, set.";
+    }
     else
-        var speechText = "I can help you learn about a company's stock information. Please say a company name";
+        var speechText = "I can help you learn about magic cards! Please say a card name";
     
-    var repromptText = "How far back should I look to find the stock price?";
+    var repromptText = "Which card property would you like to hear about?";
     
     
     var speechOutput = {
@@ -222,42 +226,39 @@ function handleGetDurationFromUser(intent, session, response){
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
-    session.attributes.wantsToChangeCompanies = false;
+    session.attributes.wantsToChangeCards = false;
+    session.attributes.knowsAttributes = true;
     session.attributes.wantsInfo = true;
     response.ask(speechOutput, repromptOutput);
 }
 /**
  * Gets a poster prepares the speech to reply to the user.
  */
-function handleGetHistoryRequest(intent, session, response) {
+function handleGetDetailsRequest(intent, session, response) {
     
     
-    var company = session.attributes.company;
-    var repromptText = "To hear historical price data for " + company +
-            ", Tell me how far back in time you want to go. For example, you could say 5 days ago, or, last week. So how far back should I look?";
+    var card = session.attributes.card;
+    var repromptText = "To information about " + card +
+            ", Tell me what you'd like to know. For example, you could say: power, or, color, or, rarity.";
  
     
-    var preSpeech = "";
+    var cardSpeech = "";
     
     
-    if(intent.slots.duration.value || intent.slots.amount.value || intent.slots.day.value){
-        if(intent.slots.amount.value){
-            if(intent.slots.amount.value === "last")
-                preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value;
-            else
-                preSpeech = company + "'s price " + intent.slots.amount.value + " " + intent.slots.duration.value + " ago ";
-        }else
-            preSpeech = company + "s price yesterday ";
+    if(intent.slots.statistic.value || intent.slots.otherStat.value){
+        cardSpeech = card + "'s " + intent.slots.statistic.value + " is " + "1";
+        if(intent.slots.otherStat.value)
+            cardSpeech += " and its " + intent.slots.otherStat.value +  "is " + "2";
     
     
         var speechOutput = {
-            speech:  preSpeech + " was $125. Current stock price is $128. Would you like to hear the price at a different time?",
+            speech:  cardSpeech + " would you like to hear more?",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
         
     }else{
         var speechOutput = {
-            speech:  "That is not a valid duration. Try something like: 1 week ago, or, yesterday",
+            speech:  "That is not a valid card attribute. Try something like: power, or text, or converted mana cost.",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
     }
@@ -269,7 +270,7 @@ function handleGetHistoryRequest(intent, session, response) {
     
     if(!session.attributes.wantsInfo){
         var speechOutput = {
-            speech:  "I can help you learn about a company's stock information. Please say a company name",
+            speech:  "I can help you learn about magic cards! Please say a card name",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
     }
@@ -281,8 +282,8 @@ function handleGetHistoryRequest(intent, session, response) {
 
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
-    // Create an instance of the HistoryBuff Skill.
-    var skill = new PriceSkill();
+    // Create an instance of the Card Skill.
+    var skill = new CardSkill();
     skill.execute(event, context);
 };
 
