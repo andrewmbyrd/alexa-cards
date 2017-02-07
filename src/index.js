@@ -164,6 +164,7 @@ function handleGetCurrentPriceRequest(intent, session, response) {
     
     //store the requested company name in the session so that we may pull a history on it if requested
     sessionAttributes.company = intent.slots.company.value;
+    sessionAttributes.wantsInfo = true;
     session.attributes = sessionAttributes;
     
     
@@ -191,8 +192,12 @@ function handleGetCurrentPriceRequest(intent, session, response) {
 
 
 function handleGetDurationFromUser(intent, session, response){
-    var speechText = "How far back should I look? For example, you can say: 5 days ago, or , last week";
-    var repromptText = "Sorry, I didn't understand that. How far back should I look to find the stock price?"
+    if(session.attributes)
+        var speechText = "How far back should I look? For example, you can say: 5 days ago, or , last week";
+    else
+        var speechText = "I can help you learn about a company's stock information. Please say a company name";
+    
+    var repromptText = "How far back should I look to find the stock price?"
     
     
     var speechOutput = {
@@ -221,6 +226,7 @@ function handleGetHistoryRequest(intent, session, response) {
     
     var preSpeech = "";
     
+    
     if(intent.slots.duration.value || intent.slots.amount.value || intent.slots.day.value){
         if(intent.slots.amount.value){
             if(intent.slots.amount.value === "last")
@@ -247,6 +253,13 @@ function handleGetHistoryRequest(intent, session, response) {
         speech: repromptText,
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
+    
+    if(!session.attributes.wantsInfo){
+        var speechOutput = {
+            speech:  "I can help you learn about a company's stock information. Please say a company name",
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+    }
     
     response.ask(speechOutput, repromptOutput);
 }
