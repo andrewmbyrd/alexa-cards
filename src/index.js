@@ -65,7 +65,7 @@ PriceSkill.prototype.eventHandlers.onSessionStarted = function (sessionStartedRe
 
 PriceSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("PriceSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    getWelcomeResponse(response);
+    getWelcomeResponse(response, session);
 };
 
 PriceSkill.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
@@ -131,7 +131,7 @@ PriceSkill.prototype.intentHandlers = {
  * Function to handle the onLaunch skill behavior
  */
 
-function getWelcomeResponse(response) {
+function getWelcomeResponse(response, session) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     
     var cardTitle = "Select a Company";
@@ -151,7 +151,7 @@ function getWelcomeResponse(response) {
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
-    sessionAttributes.wantsToChangeCompanies = true;
+    session.attributes.wantsToChangeCompanies = true;
     response.askWithCard(speechOutput, repromptOutput, cardTitle, cardOutput);
 }
 
@@ -161,8 +161,6 @@ function getWelcomeResponse(response) {
 function handleGetCurrentPriceRequest(intent, session, response) {
    
     var repromptText = "I'm awaiting your interest. Which company's stock price would you like to know?";
-    
-    var sessionAttributes = {};
     
     //store the requested company name in the session so that we may pull a history on it if requested
     
@@ -177,10 +175,10 @@ function handleGetCurrentPriceRequest(intent, session, response) {
         var company = intent.slots.company.value;
         if (company && session.attributes.wantsToChangeCompanies){
             var speechOutput = {
-                speech: intent.slots.company.value + "'s current stock price is " + "$128 per share." + " Would you like to hear historical values for this company?" ,
+                speech: intent.slots.company.value + "'s current stock price is " + "$128 per share." + " You can say a different company now if you'd like. Otherwise: would you like to hear historical values for this company?" ,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
-            session.attributes.wantsToChangeCompanies = false;
+            
         }else{
             var speechOutput = {
                 speech: "I'm not familiar with that company. Which company's stock price would you like to know?",
@@ -196,10 +194,7 @@ function handleGetCurrentPriceRequest(intent, session, response) {
     
     
     
-    sessionAttributes.company = intent.slots.company.value;
-    sessionAttributes.wantsInfo = true;
-    
-    session.attributes = sessionAttributes;
+    session.attributes.company = intent.slots.company.value;
     
     
     response.ask(speechOutput, repromptOutput);
@@ -227,6 +222,8 @@ function handleGetDurationFromUser(intent, session, response){
         type: AlexaSkill.speechOutputType.PLAIN_TEXT
     };
     
+    session.attributes.wantsToChangeCompanies = false;
+    session.attributes.wantsInfo = true;
     response.ask(speechOutput, repromptOutput);
 }
 /**
