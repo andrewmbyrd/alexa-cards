@@ -309,7 +309,7 @@ function handleGetDetailsRequest(intent, session, response) {
             
         }
         if (statOfInterest)
-            cardSpeech = card.name + "'s " + intent.slots.statistic.value + " is " + statOfInterest;
+            cardSpeech = card.name + "'s " + intent.slots.statistic.value + " is <break time = \"0.3s\"/> " + statOfInterest;
         else{
             if (card.type.indexOf("creature") < 0 && (intent.slots.statistic.value == "power" || intent.slots.statistic.value == "toughness" )){
                 cardSpeech = card.name + " is not a creature: it doesn't have power or toughness";
@@ -323,8 +323,8 @@ function handleGetDetailsRequest(intent, session, response) {
     
     
         var speechOutput = {
-            speech:  cardSpeech + " would you like to hear more?",
-            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            speech:  "<speak>" + cardSpeech + ". <break time = \"0.5s\"/> would you like to hear more?" + "</speak>",
+            type: AlexaSkill.speechOutputType.SSML
         };
         
     }else{
@@ -384,6 +384,13 @@ function retrieveCardByName(name){
     return agent.card.where({name: name})
     .then( result =>{
         var card = result[0];
+        var i = 0;
+        while (i < result.length){
+            if (card.rarity == "Special" && result.length > i +1){
+                card = result[i+1];
+            }else {break;}
+            i++;
+        }
         return card;
     })
     .catch(function(error){
