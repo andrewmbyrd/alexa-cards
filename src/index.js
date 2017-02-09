@@ -60,7 +60,7 @@ CardSkill.prototype.eventHandlers.onSessionStarted = function (sessionStartedReq
     console.log("CardSkill onSessionStarted requestId: " + sessionStartedRequest.requestId
         + ", sessionId: " + session.sessionId);
 
-    // any session init logic would go here
+    session.attributes.wantsToChangeCards = true;
 };
 
 CardSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
@@ -180,10 +180,10 @@ function handleGetCardRequest(intent, session, response) {
         return;
     }else{
     
-        /*var card =*/ retrieveCardByName(intent.slots.card.value).then(function(card){
+        retrieveCardByName(intent.slots.card.value).then(function(card){
         if (card && session.attributes.wantsToChangeCards){
             var speechOutput = {
-                speech: card.name + "'s mana cost is " + card.manaCost + ", type is " + card.type + ", card text is " + card.text + " You can say a different card now if you'd like. Otherwise: would you like to hear more details about this card?" ,
+                speech: card.name + "'s mana cost is " + updateManaCost(card.manaCost) + ", type is " + card.type + ".. card text is " + updateManaCost(card.text) + " ...You can say a different card now if you'd like. Otherwise: would you like to hear more details about this card?" ,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
             
@@ -202,7 +202,35 @@ function handleGetCardRequest(intent, session, response) {
            
         });
                                                                                 
-    
+        
+        
+        function updateManaCost(description){
+            
+            var updatedDescription = description;
+            if(updatedDescription.indexOf("{")>=0)
+              for (var x = 0; x < 11; x++){
+                 if(updatedDescription.indexOf("{")>=0){     
+   
+                    updatedDescription = updatedDescription.replace("{R}", " Red ");
+                    updatedDescription = updatedDescription.replace("{B}", " Black ");
+                    updatedDescription = updatedDescription.replace("{U}", " Blue ");
+                    updatedDescription = updatedDescription.replace("{G}", " Green ");
+                    updatedDescription = updatedDescription.replace("{W}", " White ");
+                    updatedDescription = updatedDescription.replace("{T}", " Tap ");
+                    updatedDescription = updatedDescription.replace("{B/P}", " Phrexian Black ");
+                    updatedDescription = updatedDescription.replace("{R/P}", " Phrexian Red ");
+                    updatedDescription = updatedDescription.replace("{G/P}", " Phrexian Green ");
+                    updatedDescription = updatedDescription.replace("{W/P}", " Phrexian White ");
+                    updatedDescription = updatedDescription.replace("{U/P}", " Phrexian Blue ");
+                    updatedDescription = updatedDescription.replace(/{[RGUWB]+\/[RBUGW]+}/, " Hybrid ");
+                    
+                         
+                 }else
+                    break;
+              }
+            
+            return updatedDescription;
+        }
     }
     
     
