@@ -170,10 +170,10 @@ function handleGetCardRequest(intent, session, response) {
     
     //store the requested card name in the session so that we may pull a history on it if requested
     
-    if(session.attributes.card && !session.attributes.wantsToChangeCards){
+    if(session.attributes.cardName && !session.attributes.wantsToChangeCards){
         session.attributes.wantsToChangeCards = true;
         var speechOutput = {
-            speech:  "Hey we're supposed to be talking about card details right now. If you're done with " + session.attributes.card + " then say a different card and we can start over." ,
+            speech:  "Hey we're supposed to be talking about card details right now. If you're done with " + session.attributes.cardName + " then say a different card and we can start over." ,
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
         response.ask(speechOutput, repromptOutput);
@@ -182,6 +182,7 @@ function handleGetCardRequest(intent, session, response) {
     
         retrieveCardByName(intent.slots.card.value).then(function(card){
         if (card && session.attributes.wantsToChangeCards){
+            session.attributes.currentCardObject = card;
             var speechOutput = {
                 speech: card.name + "'s mana cost is " + updateManaCost(card.manaCost) + ", type is " + card.type + ".. card text is " + updateManaCost(card.text) + " ...You can say a different card now if you'd like. Otherwise: would you like to hear more details about this card?" ,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
@@ -195,7 +196,7 @@ function handleGetCardRequest(intent, session, response) {
             console.log("card: " + card);
         }
             
-            session.attributes.card = intent.slots.card.value;
+            session.attributes.cardName = intent.slots.card.value;
     
     
             response.ask(speechOutput, repromptOutput);
@@ -203,46 +204,14 @@ function handleGetCardRequest(intent, session, response) {
         });
                                                                                 
         
-        
-        function updateManaCost(description){
-            
-            var updatedDescription = description;
-            if(updatedDescription.indexOf("{")>=0)
-              for (var x = 0; x < 11; x++){
-                 if(updatedDescription.indexOf("{")>=0){     
-   
-                    updatedDescription = updatedDescription.replace("{R}", " Red ");
-                    updatedDescription = updatedDescription.replace("{B}", " Black ");
-                    updatedDescription = updatedDescription.replace("{U}", " Blue ");
-                    updatedDescription = updatedDescription.replace("{G}", " Green ");
-                    updatedDescription = updatedDescription.replace("{W}", " White ");
-                    updatedDescription = updatedDescription.replace("{T}", " Tap ");
-                    updatedDescription = updatedDescription.replace("{B/P}", " Phrexian Black ");
-                    updatedDescription = updatedDescription.replace("{R/P}", " Phrexian Red ");
-                    updatedDescription = updatedDescription.replace("{G/P}", " Phrexian Green ");
-                    updatedDescription = updatedDescription.replace("{W/P}", " Phrexian White ");
-                    updatedDescription = updatedDescription.replace("{U/P}", " Phrexian Blue ");
-                    updatedDescription = updatedDescription.replace(/{[RGUWB]+\/[RBUGW]+}/, " Hybrid ");
-                    
-                         
-                 }else
-                    break;
-              }
-            
-            return updatedDescription;
-        }
-    }
-    
-    
-    
-    
+    } 
     
 
 }
 
 
 function handleGetConfirmationFromUser(intent, session, response){
-    if(session.attributes.card){
+    if(session.attributes.cardName){
         var speechText = "What would you like to know?";
         if(!session.attributes.knowsAttributes)
             speechText += " for example, you can say: power, or, rarity, or, set.";
@@ -275,8 +244,8 @@ function handleGetConfirmationFromUser(intent, session, response){
 function handleGetDetailsRequest(intent, session, response) {
     
     
-    var card = session.attributes.card;
-    var repromptText = "To information about " + card +
+    var card = session.attributes.currentCardObject;
+    var repromptText = "To hear more information about " + card.name +
             ", Tell me what you'd like to know. For example, you could say: power, or, color, or, rarity.";
  
     
@@ -284,9 +253,73 @@ function handleGetDetailsRequest(intent, session, response) {
     
     
     if(intent.slots.statistic.value || intent.slots.otherStat.value){
-        cardSpeech = card + "'s " + intent.slots.statistic.value + " is " + "1";
+        var statOfInterest = "";
+        switch (intent.slots.statistic.value){
+            case "power":
+                statOfInterest = card.power;
+                break;
+            case "toughness":
+                statOfInterest = card.toughness;
+                break;
+            case "converted mana cost":
+                statOfInterest = card.cmc;
+                break;
+            case "cmc":
+                statOfInterest = card.cmc;
+                break;
+            case "color identity":
+                statOfInterest = card.colorIdentity;
+                break;
+            case "mana cost":
+                statOfInterest = card.manaCost;
+                break;
+            case "color":
+                statOfInterest = card.colors;
+                break;
+            case "colors":
+                statOfInterest = card.colors;
+                break;
+            case "type":
+                statOfInterest = card.type;
+                break;
+            case "supertype":
+                statOfInterest = card.supertype;
+                break;
+            case "subtype":
+                statOfInterest = card.subtype;
+                break;
+            case "rarity":
+                statOfInterest = card.rarity;
+                break;
+            case "setName":
+                statOfInterest = card. setName;
+                break;
+            case "set":
+                statOfInterest = card.set;
+                break;
+            case "text":
+                statOfInterest = card.text;
+                break;
+            case "flavor text":
+                statOfInterest = card.flavor;
+                break;
+            case "multiverse ID":
+                statOfInterest = card.multiverseid;
+                break;
+            
+        }
+        if (statOfInterest)
+            cardSpeech = card.name + "'s " + intent.slots.statistic.value + " is " + statOfInterest;
+        else{
+            if (card.type.indexOf("creature") < 0 && (intent.slots.statistic.value == "power" || intent.slots.statistic.value == "toughness" )){
+                cardSpeech = card.name + " is not a creature: it doesn't have power or toughness";
+            }else{
+                cardSpeech = card.name + " doesn't have that attribute.";
+            }
+        }
+            
         if(intent.slots.otherStat.value)
-            cardSpeech += " and its " + intent.slots.otherStat.value +  "is " + "2";
+            cardSpeech += " and its " + intent.slots.otherStat.value +  " is " + card.toughness;
     
     
         var speechOutput = {
@@ -296,7 +329,7 @@ function handleGetDetailsRequest(intent, session, response) {
         
     }else{
         var speechOutput = {
-            speech:  "That is not a valid card attribute. Try something like: power, or text, or converted mana cost.",
+            speech:  "That is not a valid card attribute. Try something like: power, or flavor text, or converted mana cost.",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
     }
@@ -315,6 +348,37 @@ function handleGetDetailsRequest(intent, session, response) {
     
     response.ask(speechOutput, repromptOutput);
 }
+
+
+
+        
+function updateManaCost(description){
+
+    var updatedDescription = description;
+    if(updatedDescription.indexOf("{")>=0)
+      for (var x = 0; x < 11; x++){
+         if(updatedDescription.indexOf("{")>=0){     
+
+            updatedDescription = updatedDescription.replace("{R}", " Red ");
+            updatedDescription = updatedDescription.replace("{B}", " Black ");
+            updatedDescription = updatedDescription.replace("{U}", " Blue ");
+            updatedDescription = updatedDescription.replace("{G}", " Green ");
+            updatedDescription = updatedDescription.replace("{W}", " White ");
+            updatedDescription = updatedDescription.replace("{T}", " Tap ");
+            updatedDescription = updatedDescription.replace("{B/P}", " Phrexian Black ");
+            updatedDescription = updatedDescription.replace("{R/P}", " Phrexian Red ");
+            updatedDescription = updatedDescription.replace("{G/P}", " Phrexian Green ");
+            updatedDescription = updatedDescription.replace("{W/P}", " Phrexian White ");
+            updatedDescription = updatedDescription.replace("{U/P}", " Phrexian Blue ");
+            updatedDescription = updatedDescription.replace(/{[RGUWB]+\/[RBUGW]+}/, " Hybrid ");
+
+
+         }else {break;}
+      }
+
+    return updatedDescription;
+}
+
 
 function retrieveCardByName(name){
     return agent.card.where({name: name})
