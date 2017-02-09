@@ -31,8 +31,8 @@
  */
 var APP_ID = undefined; //replace with 'amzn1.echo-sdk-ams.app.[your-unique-value-here]';
 
-//this is going to allow me to talk to the commodity price listing API
-var https = require('https');
+//this allows me to access the database of Magic cards
+const agent = require('mtgsdk');
 
 /**
  * The AlexaSkill Module that has the AlexaSkill prototype and helper functions. Alexa Skill is nothing more than a constructor function and its
@@ -93,7 +93,7 @@ CardSkill.prototype.intentHandlers = {
     //we should a HelpIntent was called, which we correlate with the function described here. the response.ask makes her talk back to the user, with the expectation of a response
     //from the user
     "AMAZON.HelpIntent": function (intent, session, response) {
-        var speechText = "With Cards, you can get information about thousands of Magic Cards  " +
+        var speechText = "With Cards, you can get information about thousands of Magic Cards, all the way up to the Battle for Zendikar set!  " +
             "For example, you could say Path to Exile. or Dark Confidant. or you can say exit. Now, which card would you like to hear about?";
         var repromptText = "Which card's info would you like to know?";
         var speechOutput = {
@@ -135,7 +135,7 @@ function getWelcomeResponse(response, session) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     
     var cardTitle = "Select a Card";
-    var repromptText = "With Cards, you can get information about thousands of Magic Cards  " +
+    var repromptText = "With Cards, you can get information about thousands of Magic Cards, all the way up to the Battle for Zendikar set!  " +
             "For example, you could say Path to Exile. or Dark Confidant. or you can say exit. Now, which card would you like to hear about?";
     var speechText = "<p>Welcome to Magic Card Information Station!</p> <p>What card would you like to hear about?</p>";
     var cardOutput = "Welcome to Cards. What card would you like to learn about?";
@@ -163,20 +163,27 @@ function handleGetCardRequest(intent, session, response) {
    
     var repromptText = "I'm awaiting your interest. Which card would you like to learn about?";
     
+    var repromptOutput = {
+        speech:  repromptText ,
+        type: AlexaSkill.speechOutputType.PLAIN_TEXT
+    };
+    
     //store the requested card name in the session so that we may pull a history on it if requested
     
-    if(session.attributes.card && !session.attributes.wantsToCards){
+    if(session.attributes.card && !session.attributes.wantsToChangeCards){
         session.attributes.wantsToChangeCards = true;
         var speechOutput = {
             speech:  "Hey we're supposed to be talking about card details right now. If you're done with " + session.attributes.card + " then say a different card and we can start over." ,
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
+        response.ask(speechOutput, repromptOutput);
+        return;
     }else{
     
-        var card = intent.slots.card.value;
+        /*var card =*/ retrieveCardByName(intent.slots.card.value).then(function(card){
         if (card && session.attributes.wantsToChangeCards){
             var speechOutput = {
-                speech: intent.slots.card.value + "'s mana cost is " + "red" + ", type is " + "creature" + ", card text is " + "haste, prowess" + "You can say a different card now if you'd like. Otherwise: would you like to hear more details about this card?" ,
+                speech: card.name + "'s mana cost is " + card.manaCost + ", type is " + card.type + ", card text is " + card.text + " You can say a different card now if you'd like. Otherwise: would you like to hear more details about this card?" ,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
             
@@ -185,20 +192,23 @@ function handleGetCardRequest(intent, session, response) {
                 speech: "I'm not familiar with that card. Which card would you like to know about?",
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
+            console.log("card: " + card);
         }
+            
+            session.attributes.card = intent.slots.card.value;
+    
+    
+            response.ask(speechOutput, repromptOutput);
+           
+        });
+                                                                                
     
     }
-    var repromptOutput = {
-        speech:  repromptText ,
-        type: AlexaSkill.speechOutputType.PLAIN_TEXT
-    };
     
     
     
-    session.attributes.card = intent.slots.card.value;
     
     
-    response.ask(speechOutput, repromptOutput);
 
 }
 
@@ -278,7 +288,16 @@ function handleGetDetailsRequest(intent, session, response) {
     response.ask(speechOutput, repromptOutput);
 }
 
-
+function retrieveCardByName(name){
+    return agent.card.where({name: name})
+    .then( result =>{
+        var card = result[0];
+        return card;
+    })
+    .catch(function(error){
+        console.log("Error: " + error);
+    });
+}
 
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
