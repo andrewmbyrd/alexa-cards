@@ -199,7 +199,7 @@ function handleGetCardRequest(intent, session, response) {
             session.attributes.cardName = intent.slots.card.value;
     
     
-            response.ask(speechOutput, repromptOutput);
+            response.askWithCard(speechOutput, repromptOutput, card.name, "Card Image from Gatherer", card.imageUrl);
            
         });
                                                                                 
@@ -375,6 +375,8 @@ function updateManaCost(description){
 
          }else {break;}
       }
+    updatedDescription = updatedDescription.replace("*", " Star ");
+    updatedDescription = updatedDescription.replace("*", " Star ");
 
     return updatedDescription;
 }
