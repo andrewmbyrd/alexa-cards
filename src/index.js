@@ -40,11 +40,6 @@ const agent = require('mtgsdk');
  */
 var AlexaSkill = require('./AlexaSkill');
 
-/**
- * URL prefix from which to search prices
- */
-var urlPrefix = undefined; //this will be updated later after I've gotten the speech working
-
 
 // CardSkill is a child of AlexaSkill.
 
@@ -59,7 +54,8 @@ CardSkill.prototype.constructor = CardSkill;
 CardSkill.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
     console.log("CardSkill onSessionStarted requestId: " + sessionStartedRequest.requestId
         + ", sessionId: " + session.sessionId);
-
+    
+    // initialize the flag wantsToChangeCards to true. this variable helps control the natural flow of conversation
     session.attributes.wantsToChangeCards = true;
 };
 
@@ -89,8 +85,8 @@ CardSkill.prototype.intentHandlers = {
         handleGetConfirmationFromUser(intent, session, response);
     },
 
-    //here, we're overriding Amazon's built-in help intent functionality (i think). So based on the user's words, Alexa deciphers that 
-    //we should a HelpIntent was called, which we correlate with the function described here. the response.ask makes her talk back to the user, with the expectation of a response
+    //here, we're overriding Amazon's built-in help intent functionality. So based on the user's words, Alexa deciphers that 
+    // a HelpIntent was called, which we correlate with the function described here. the response.ask makes her talk back to the user, with the expectation of a response
     //from the user
     "AMAZON.HelpIntent": function (intent, session, response) {
         var speechText = "With Cards, you can get information about thousands of Magic Cards, all the way up to the Battle for Zendikar set!  " +
@@ -108,7 +104,7 @@ CardSkill.prototype.intentHandlers = {
     },
 
     //i'm making her say Ok, Goodbye! when she detects that the user has said something (like "exit" or "stop") to trigger the StopIntent
-    //I wonder why here we don't have like a session.close() or something? <- because tell indicates that sessionShouldEnd = true
+    // "tell" indicates that sessionShouldEnd = true
     "AMAZON.StopIntent": function (intent, session, response) {
         var speechOutput = {
                 speech: "Ok, Goodbye!",
@@ -140,8 +136,7 @@ function getWelcomeResponse(response, session) {
     var speechText = "<p>Welcome to Magic Card Information Station!</p> <p>What card would you like to hear about?</p>";
     var cardOutput = "Welcome to Cards. What card would you like to learn about?";
     var cardOutput = "Welcome to Cards. What card would you like to learn about?";
-    // If the user either does not reply to the welcome message or says something that is not
-    // understood, they will be prompted again with this text.
+    // If the user either does not reply to the welcome message they will be prompted again with this text.
 
     var speechOutput = {
         speech: speechText ,
@@ -157,7 +152,7 @@ function getWelcomeResponse(response, session) {
 }
 
 /**
- * Gets a poster prepares the speech to reply to the user.
+ * when she hears a card name, she prepares the speech to reply to the user.
  */
 function handleGetCardRequest(intent, session, response) {
    
@@ -180,6 +175,7 @@ function handleGetCardRequest(intent, session, response) {
         return;
     }else{
     
+        //gets the card from a database query, then with that new card, tells the user about it. store the card in session
         retrieveCardByName(intent.slots.card.value).then(function(card){
         if (card && session.attributes.wantsToChangeCards){
             session.attributes.currentCardObject = card;
@@ -209,7 +205,9 @@ function handleGetCardRequest(intent, session, response) {
 
 }
 
-
+//confirms whether or not the user wants further information about the current card object.
+//if they do, then we set wantsToChangeCards to false so that we know they should now be asking about card
+//properties, not card names
 function handleGetConfirmationFromUser(intent, session, response){
     if(session.attributes.cardName){
         var speechText = "What would you like to know?";
@@ -239,7 +237,7 @@ function handleGetConfirmationFromUser(intent, session, response){
     response.ask(speechOutput, repromptOutput);
 }
 /**
- * Gets a poster prepares the speech to reply to the user.
+ * Identifies which card aspect the user asked about, and relays that information to them
  */
 function handleGetDetailsRequest(intent, session, response) {
     
@@ -351,6 +349,9 @@ function handleGetDetailsRequest(intent, session, response) {
 
 
 
+//the database does not have its text set up for natural speech.
+//conveniently, the {} are always used to denote costs of the card, so we can translate into 
+// natural speech with this function
         
 function updateManaCost(description){
 
@@ -381,7 +382,7 @@ function updateManaCost(description){
     return updatedDescription;
 }
 
-
+//this is the function that grabs the card from the online database.
 function retrieveCardByName(name){
     return agent.card.where({name: name})
     .then( result =>{
