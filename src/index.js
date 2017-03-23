@@ -47,6 +47,11 @@ var CardSkill = function() {
     AlexaSkill.call(this, APP_ID);
 };
 
+
+
+
+
+
 // Extend AlexaSkill. so now CardSkill is a constructor function that inherits all methods (at present) from AlexaSkill
 CardSkill.prototype = Object.create(AlexaSkill.prototype);
 CardSkill.prototype.constructor = CardSkill;
