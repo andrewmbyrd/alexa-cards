@@ -139,8 +139,7 @@ function getWelcomeResponse(response, session) {
     var repromptText = "With Cards, you can get information about thousands of Magic Cards, all the way up to the Battle for Zendikar set!  " +
             "For example, you could say Path to Exile. or Dark Confidant. or you can say exit. Now, which card would you like to hear about?";
     var speechText = "<p>Welcome to Magic Card Information Station!</p> <p>What card would you like to hear about?</p>";
-    var cardOutput = "Welcome to Cards. What card would you like to learn about?";
-    var cardOutput = "Welcome to Cards. What card would you like to learn about?";
+    
     // If the user either does not reply to the welcome message they will be prompted again with this text.
 
     var speechOutput = {
@@ -153,7 +152,7 @@ function getWelcomeResponse(response, session) {
     };
     
     session.attributes.wantsToChangeCards = true;
-    response.askWithCard(speechOutput, repromptOutput, cardTitle, cardOutput);
+    response.ask(speechOutput, repromptOutput);
 }
 
 /**
@@ -194,13 +193,15 @@ function handleGetCardRequest(intent, session, response) {
                 speech: "I'm not familiar with that card. Which card would you like to know about?",
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
-            console.log("card: " + card);
-        }
             
-            session.attributes.cardName = intent.slots.card.value;
-    
-    
-            response.askWithCard(speechOutput, repromptOutput, card.name, "Card Image from Gatherer", card.imageUrl);
+        }
+            if (card){
+                session.attributes.cardName = intent.slots.card.value;
+                response.ask(speechOutput, repromptOutput);
+            }else{
+                session.attributes.cardName = null;
+                response.ask(speechOutput, repromptOutput);
+            }
            
         });
                                                                                 
@@ -248,108 +249,115 @@ function handleGetDetailsRequest(intent, session, response) {
     
     
     var card = session.attributes.currentCardObject;
-    var repromptText = "To hear more information about " + card.name +
-            ", Tell me what you'd like to know. For example, you could say: power, or, color, or, rarity.";
- 
-    
-    var cardSpeech = "";
-    
-    
-    if(intent.slots.statistic.value || intent.slots.otherStat.value){
-        var statOfInterest = "";
-        switch (intent.slots.statistic.value){
-            case "power":
-                statOfInterest = card.power;
-                break;
-            case "toughness":
-                statOfInterest = card.toughness;
-                break;
-            case "converted mana cost":
-                statOfInterest = card.cmc;
-                break;
-            case "cmc":
-                statOfInterest = card.cmc;
-                break;
-            case "color identity":
-                statOfInterest = card.colorIdentity;
-                break;
-            case "mana cost":
-                statOfInterest = card.manaCost;
-                break;
-            case "color":
-                statOfInterest = card.colors;
-                break;
-            case "colors":
-                statOfInterest = card.colors;
-                break;
-            case "type":
-                statOfInterest = card.type;
-                break;
-            case "supertype":
-                statOfInterest = card.supertype;
-                break;
-            case "subtype":
-                statOfInterest = card.subtype;
-                break;
-            case "rarity":
-                statOfInterest = card.rarity;
-                break;
-            case "setName":
-                statOfInterest = card. setName;
-                break;
-            case "set":
-                statOfInterest = card.set;
-                break;
-            case "text":
-                statOfInterest = card.text;
-                break;
-            case "flavor text":
-                statOfInterest = card.flavor;
-                break;
-            case "multiverse ID":
-                statOfInterest = card.multiverseid;
-                break;
-            
-        }
-        if (statOfInterest)
-            cardSpeech = card.name + "'s " + intent.slots.statistic.value + " is <break time = \"0.3s\"/> " + statOfInterest;
-        else{
-            if (card.type.indexOf("creature") < 0 && (intent.slots.statistic.value == "power" || intent.slots.statistic.value == "toughness" )){
-                cardSpeech = card.name + " is not a creature: it doesn't have power or toughness";
-            }else{
-                cardSpeech = card.name + " doesn't have that attribute.";
+    if(card){
+        var repromptText = "To hear more information about " + card.name +
+                ", Tell me what you'd like to know. For example, you could say: power, or, color, or, rarity.";
+
+
+        var cardSpeech = "";
+
+
+        if(intent.slots.statistic.value || intent.slots.otherStat.value){
+            var statOfInterest = "";
+            switch (intent.slots.statistic.value){
+                case "power":
+                    statOfInterest = card.power;
+                    break;
+                case "toughness":
+                    statOfInterest = card.toughness;
+                    break;
+                case "converted mana cost":
+                    statOfInterest = card.cmc;
+                    break;
+                case "cmc":
+                    statOfInterest = card.cmc;
+                    break;
+                case "color identity":
+                    statOfInterest = card.colorIdentity;
+                    break;
+                case "mana cost":
+                    statOfInterest = card.manaCost;
+                    break;
+                case "color":
+                    statOfInterest = card.colors;
+                    break;
+                case "colors":
+                    statOfInterest = card.colors;
+                    break;
+                case "type":
+                    statOfInterest = card.type;
+                    break;
+                case "supertype":
+                    statOfInterest = card.supertype;
+                    break;
+                case "subtype":
+                    statOfInterest = card.subtype;
+                    break;
+                case "rarity":
+                    statOfInterest = card.rarity;
+                    break;
+                case "setName":
+                    statOfInterest = card. setName;
+                    break;
+                case "set":
+                    statOfInterest = card.set;
+                    break;
+                case "text":
+                    statOfInterest = card.text;
+                    break;
+                case "flavor text":
+                    statOfInterest = card.flavor;
+                    break;
+                case "multiverse ID":
+                    statOfInterest = card.multiverseid;
+                    break;
+                case "loyalty":
+                    statOfInterest = card.loyalty;
+                    break;
+
             }
+            if (statOfInterest)
+                cardSpeech = card.name + "'s " + intent.slots.statistic.value + " is <break time = \"0.3s\"/> " + statOfInterest;
+            else{
+                if (card.type.indexOf("creature") < 0 && (intent.slots.statistic.value == "power" || intent.slots.statistic.value == "toughness" )){
+                    cardSpeech = card.name + " is not a creature: it doesn't have power or toughness";
+                }else{
+                    cardSpeech = card.name + " doesn't have that attribute.";
+                }
+            }
+
+            if(intent.slots.otherStat.value)
+                cardSpeech += " and its " + intent.slots.otherStat.value +  " is " + card.toughness;
+
+
+            var speechOutput = {
+                speech:  "<speak>" + cardSpeech + ". <break time = \"0.5s\"/> would you like to hear more?" + "</speak>",
+                type: AlexaSkill.speechOutputType.SSML
+            };
+
+        }else{
+            var speechOutput = {
+                speech:  "That is not a valid card attribute. Try something like: power, or flavor text, or converted mana cost.",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
         }
-            
-        if(intent.slots.otherStat.value)
-            cardSpeech += " and its " + intent.slots.otherStat.value +  " is " + card.toughness;
-    
-    
-        var speechOutput = {
-            speech:  "<speak>" + cardSpeech + ". <break time = \"0.5s\"/> would you like to hear more?" + "</speak>",
-            type: AlexaSkill.speechOutputType.SSML
+
+        var repromptOutput = {
+            speech: repromptText,
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
-        
+
+        if(!session.attributes.wantsInfo){
+            var speechOutput = {
+                speech:  "I'm sorry, I didn't interpret that as a card name. These magic card titles can be confusing you know! Please say another card name",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
+        }
+
+        response.ask(speechOutput, repromptOutput);
     }else{
-        var speechOutput = {
-            speech:  "That is not a valid card attribute. Try something like: power, or flavor text, or converted mana cost.",
-            type: AlexaSkill.speechOutputType.PLAIN_TEXT
-        };
+        response.ask("Sorry I couldn't interpret that correctly. Please ask me a card name.", "Sorry I couldn't interpret that correctly. Please ask me a card name.")
     }
-    
-    var repromptOutput = {
-        speech: repromptText,
-        type: AlexaSkill.speechOutputType.PLAIN_TEXT
-    };
-    
-    if(!session.attributes.wantsInfo){
-        var speechOutput = {
-            speech:  "I can help you learn about magic cards! Please say a card name",
-            type: AlexaSkill.speechOutputType.PLAIN_TEXT
-        };
-    }
-    
-    response.ask(speechOutput, repromptOutput);
 }
 
 
@@ -383,6 +391,7 @@ function updateManaCost(description){
       }
     updatedDescription = updatedDescription.replace("*", " Star ");
     updatedDescription = updatedDescription.replace("*", " Star ");
+    updatedDescription = updatedDescription.replace(/\//, " Slash " );
 
     return updatedDescription;
 }
@@ -394,6 +403,8 @@ function retrieveCardByName(name){
         var card = result[0];
         var i = 0;
         while (i < result.length){
+            if (!card)
+                {break;}
             if (card.rarity == "Special" && result.length > i +1){
                 card = result[i+1];
             }else {break;}
